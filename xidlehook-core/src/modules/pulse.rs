@@ -107,9 +107,19 @@ impl NotWhenAudio {
                 .get_sink_input_info_list(move |res| match res {
                     ListResult::Item(item) => {
                         if !item.corked {
-                            let count = counter.in_progress.get().saturating_add(1);
-                            counter.in_progress.set(count);
-                            debug!("Partial count: {}", count);
+                            // Workaround: Check for AudioCallbackDriver of Firefox and ignore it
+                            // FIXME: Is there a better way?
+                            match &item.name {
+                                Some(name) => if name != "AudioCallbackDriver" {
+                                let count = counter.in_progress.get().saturating_add(1);
+                                counter.in_progress.set(count);
+                                debug!("Partial count: {}", count);
+                                }
+                                else {
+                                    debug!("Not considered {}", name);
+                                },
+                                None => debug!(""),
+                            }
                         }
                     },
                     ListResult::End | ListResult::Error => {
