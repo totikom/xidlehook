@@ -1,3 +1,8 @@
+# About this fork
+Unfortunately the original author of xidlehook passed away (R.I.P.). There was a small issue bothering me, and there was a PR for that, but it couldn't get merged, so I just created a fork with the changes in that PR. I have no experience with Rust, but since no one is taking over this awesome project I decided to do it anyway. Perhaps I will spend some of my free time looking into this project, perhaps not. With that being said, please feel free to open issues or PRs here and I will try my best to investigate them if I had time.
+
+xidlehook is a very useful piece of software and I have been using it for a long time. Thanks jD91mZM2 for making it. May God be with you in Heaven.
+
 -   [xidlehook](#xidlehook)
     -   [Example](#example)
     -   [Installation](#installation)
