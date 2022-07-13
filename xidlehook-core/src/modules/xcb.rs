@@ -232,6 +232,7 @@ impl Xcb {
                 .map(|s| [s.0, s.1.strip_suffix('\0').unwrap_or(s.1)])
                 .unwrap_or(["", ""]);
 
+            println!("desktop: {:?}, ad: {:?}, class: {:?}", value_desktop, active_desktop, value_wm_class[0]);
             // println!("wmname: {:?}; wmclass: {:?}", value_wm_name, value_wm_class);
             // println!("wm_state: {:?}; value_desktop: {:?}", value_wm_state, value_desktop);
             // println!("_net_wm_state_fullscreen: {:?}", value_net_wm_state);
@@ -245,6 +246,9 @@ impl Xcb {
                 .first()
                 .map(|&state| state != 0) // 0 is WithdrawnState
                 .unwrap_or(false)
+            && value_desktop.len() > 0
+            && active_desktop.len() > 0
+            && value_desktop[0] == active_desktop[0]
             && exceptions_wm_name
                 .map(|v| !v.contains(&value_wm_name.to_owned()))
                 .unwrap_or(true)
