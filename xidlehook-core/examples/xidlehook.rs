@@ -92,7 +92,8 @@ fn main() -> xidlehook_core::Result<()> {
         modules.push(Box::new(StopAt::completion()));
     }
     if opt.not_when_fullscreen {
-        modules.push(Box::new(Rc::clone(&xcb).not_when_fullscreen()));
+        modules.push(Box::new(Rc::clone(&xcb).not_when_fullscreen(
+            None, None, None)));
     }
     #[cfg(feature = "pulse")]
     {
