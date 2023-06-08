@@ -15,6 +15,7 @@
 
 use std::{fs, rc::Rc, time::Duration};
 
+
 use log::{trace, warn};
 use nix::sys::wait;
 use structopt::StructOpt;
@@ -22,15 +23,16 @@ use tokio::{
     signal::unix::{signal, SignalKind},
     sync::mpsc,
 };
+
 use xidlehook_core::{
-    modules::{StopAt, Xcb},
-    Module, Xidlehook,
+    Module,
+    modules::{StopAt, Xcb}, Xidlehook,
 };
+
+use self::timers::CmdTimer;
 
 mod socket;
 mod timers;
-
-use self::timers::CmdTimer;
 
 struct Defer<F: FnMut()>(F);
 impl<F: FnMut()> Drop for Defer<F> {
@@ -51,8 +53,24 @@ pub struct Opt {
     /// Don't invoke the timer when the current application is
     /// fullscreen. Useful for preventing a lockscreen when watching
     /// videos.
-    #[structopt(long, conflicts_with("print"))]
+    #[structopt(long, conflicts_with("print"), name = "not_when_fullscreen")]
     pub not_when_fullscreen: bool,
+
+    /// Exclude windows from --not-when-fullscreen option based on first wm_class tag
+    #[structopt(long, conflicts_with("print"),
+        requires("not_when_fullscreen"), value_name = "wm_class1")]
+    pub exclude_wm_class1: Option<Vec<String>>,
+
+    /// Exclude windows from --not-when-fullscreen option based on second wm_class tag
+    #[structopt(long, conflicts_with("print"),
+        requires("not_when_fullscreen"), value_name = "wm_class2")]
+    pub exclude_wm_class2: Option<Vec<String>>,
+
+    /// Exclude windows from --not-when-fullscreen option based on wm_name tag
+    #[structopt(long, conflicts_with("print"),
+        requires("not_when_fullscreen"), value_name = "wm_name")]
+    pub exclude_wm_name: Option<Vec<String>>,
+
     /// Detect when the system wakes up from a suspend and reset the idle timer
     #[structopt(long, conflicts_with("print"))]
     pub detect_sleep: bool,
@@ -119,7 +137,11 @@ async fn main() -> xidlehook_core::Result<()> {
         modules.push(Box::new(StopAt::completion()));
     }
     if opt.not_when_fullscreen {
-        modules.push(Box::new(Rc::clone(&xcb).not_when_fullscreen()));
+        modules.push(Box::new(Rc::clone(&xcb).not_when_fullscreen(
+            opt.exclude_wm_class1.clone(),
+            opt.exclude_wm_class2.clone(),
+            opt.exclude_wm_name.clone(),
+        )));
     }
     #[cfg(feature = "pulse")]
     {
