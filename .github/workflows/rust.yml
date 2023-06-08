@@ -1,0 +1,30 @@
+name: Rust
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: | 
+        cargo build --release --bins
+    - name: Upload files to a GitHub release
+      uses: svenstaro/upload-release-action@2.2.1
+      with:
+        # GitHub token.
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        # Local file to upload.
+        file: target/release/xidlehook
+        # Tag to use as a release.
+        tag: ${{ github.ref }}
